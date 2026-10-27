@@ -29,13 +29,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      # Le paquet « tools » par défaut de l'action n'existe plus dans les
+      # command-line tools récents : on liste explicitement ce qui sert.
       - uses: android-actions/setup-android@v3
-      - name: Générer le wrapper Gradle
-        working-directory: android/SmsRelay
-        run: gradle wrapper --gradle-version 8.9
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      # Gradle n'est plus garanti sur les images ubuntu-latest : l'action
+      # officielle fournit la version voulue, sans wrapper versionné.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
       - name: assembleRelease
         working-directory: android/SmsRelay
-        run: ./gradlew assembleRelease --no-daemon
+        run: gradle assembleRelease --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: SmsRelay-apk

@@ -1,0 +1,83 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  tests:
+    name: Tests de la logique métier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Exécuter le harnais
+        run: dotnet run --project src/SmsBlast.Tests -c Release -- samples
+
+  apk:
+    name: APK du relais Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Générer le wrapper Gradle
+        working-directory: android/SmsRelay
+        run: gradle wrapper --gradle-version 8.9
+      - name: assembleRelease
+        working-directory: android/SmsRelay
+        run: ./gradlew assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmsRelay-apk
+          path: android/SmsRelay/app/build/outputs/apk/release/*.apk
+
+  windows:
+    name: Application WPF
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Publier un exécutable autonome
+        run: >
+          dotnet publish src/SmsBlast.App/SmsBlast.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish
+      - name: Joindre l'APK pré-construit
+        run: copy dist\SmsRelay.apk publish\SmsRelay.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmsBlast-windows
+          path: publish/
+
+  release:
+    name: Publier une release
+    needs: [tests, apk, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Compresser l'application Windows
+        run: cd artifacts/SmsBlast-windows && zip -qr ../../SmsBlast-windows.zip . && cd -
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SmsBlast-windows.zip
+            artifacts/SmsRelay-apk/*.apk

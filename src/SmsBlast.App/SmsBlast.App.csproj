@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>SmsBlast.App</RootNamespace>
+    <AssemblyName>SmsBlast</AssemblyName>
+    <Version>1.0.0</Version>
+    <!-- Permet un `dotnet build` depuis un poste non-Windows (CI Linux). -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <!-- L'APK du relais est copié à côté de l'exécutable quand il est présent :
+       le bouton « Préparer le téléphone » le propose alors par défaut. -->
+  <ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\dist\SmsRelay.apk')">
+    <None Include="$(MSBuildThisFileDirectory)..\..\dist\SmsRelay.apk"
+          Link="SmsRelay.apk"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>SmsBlast.Tests</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- La logique métier est partagée telle quelle avec le projet WPF :
+         ces fichiers ne dépendent que du framework, donc ils compilent aussi
+         hors Windows, ce qui rend les tests exécutables partout. -->
+    <Compile Include="Program.cs" />
+    <Compile Include="..\SmsBlast.App\Core\*.cs" LinkBase="Core" />
+  </ItemGroup>
+
+</Project>

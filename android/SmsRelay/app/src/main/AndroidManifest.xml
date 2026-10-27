@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Seule permission demandée. Aucun accès réseau, aucun accès aux contacts. -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <application
+        android:allowBackup="false"
+        android:label="SMS Relay"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="SMS Relay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Déclenché explicitement depuis le PC :
+             adb shell am broadcast -n com.smsblast.relay/.SendSmsReceiver ... -->
+        <receiver
+            android:name=".SendSmsReceiver"
+            android:exported="true" />
+
+        <!-- Reçoit les accusés d'émission du framework télécom. Interne. -->
+        <receiver
+            android:name=".SmsStatusReceiver"
+            android:exported="false" />
+
+    </application>
+</manifest>

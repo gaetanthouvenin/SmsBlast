@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+publish/
+build/
+*.user
+android/SmsRelay/build/
+android/SmsRelay/app/build/
+android/SmsRelay/.gradle/
+android/SmsRelay/local.properties
+*.apk
+!SmsRelay.apk
